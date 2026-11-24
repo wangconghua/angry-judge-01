@@ -19,31 +19,84 @@ ENTRY = (
 BANNED_WORDS = ("funny", "joke", "haha", "lol", "hilarious")
 
 
-def validate(text):
-    """Substantive checks on the rant before it is written out."""
+def check_is_text(text):
+    """The entry must be a string, not bytes or another type."""
     if not isinstance(text, str):
         raise ValueError("entry must be a string")
+    return True
+
+
+def check_length(text):
+    """The gate allows 1 to 400 UTF-8 characters."""
     if not 1 <= len(text) <= 400:
         raise ValueError(f"entry must be 1-400 characters, got {len(text)}")
+    return True
+
+
+def check_not_blank(text):
+    """A rant made of only white space says nothing."""
     if not text.strip():
         raise ValueError("entry must not be only white space")
+    return True
+
+
+def check_no_edge_whitespace(text):
+    """No leading or trailing white space around the rant."""
     if text != text.strip():
         raise ValueError("entry must not have leading or trailing white space")
+    return True
+
+
+def check_no_double_spaces(text):
+    """Double spaces are a formatting slip, not a punchline."""
     if "  " in text:
         raise ValueError("entry must not contain double spaces")
+    return True
+
+
+def check_no_joke_explaining_words(text):
+    """A rant that has to tell the judge it is funny is not funny."""
     lowered = text.lower()
     for word in BANNED_WORDS:
         if word in lowered:
             raise ValueError(f"entry must not explain its own joke: {word!r}")
+    return True
+
+
+def check_terminal_punctuation(text):
+    """A rant ends on a full stop, not a trailing thought."""
     if text[-1] not in ".!?":
         raise ValueError("entry must end with terminal punctuation")
-    # A rant needs a specific, concrete annoyance, not a vague mood.
+    return True
+
+
+def check_concrete_annoyance(text):
+    """A rant needs a specific, concrete annoyance, not a vague mood."""
+    lowered = text.lower()
     if "smoke detector" not in lowered or "battery" not in lowered:
         raise ValueError("entry must name its concrete annoyance")
-    # A rant is a few sentences, not one flat line and not an essay.
+    return True
+
+
+def check_sentence_count(text):
+    """A rant is a few sentences, not one flat line and not an essay."""
     sentences = [s for s in text.split(". ") if s.strip()]
     if len(sentences) < 3:
         raise ValueError("entry must be a few sentences, got fewer than 3")
+    return True
+
+
+def validate(text):
+    """Substantive checks on the rant before it is written out."""
+    check_is_text(text)
+    check_length(text)
+    check_not_blank(text)
+    check_no_edge_whitespace(text)
+    check_no_double_spaces(text)
+    check_no_joke_explaining_words(text)
+    check_terminal_punctuation(text)
+    check_concrete_annoyance(text)
+    check_sentence_count(text)
     return True
 
 
